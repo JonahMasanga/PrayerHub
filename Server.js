@@ -1,25 +1,20 @@
-// Import required modules
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const cors = require('cors'); // Add CORS support for frontend-backend communication
 
-// Initialize Express app
 const app = express();
 const port = 3000;
 
 // Middleware to parse JSON and URL-encoded data
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors()); // Enable CORS for all routes
 
 // PesaPal credentials (replace with your actual credentials)
 const PESAPAL_CONSUMER_KEY = 'cYZmXbANyExiVpmW1QtftPJrxQ5QQjKj'; // Replace with your actual consumer key
 const PESAPAL_CONSUMER_SECRET = 'xqqM6ArR9HfZLh3zy/AbNxj46To='; // Replace with your actual consumer secret
 const PESAPAL_API_URL = 'https://www.pesapal.com/api';
-
-// Root route
-app.get('/', (req, res) => {
-    res.send('Welcome to the PesaPal Integration Server!');
-});
 
 // Route to initiate payment
 app.post('/initiate-payment', async (req, res) => {
