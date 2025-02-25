@@ -24,11 +24,19 @@
     <p>Click on the Donate to us button to choose your favourite donation method</p>
     <div class="payment-options">
 
-        </button>
-      
-        <button onclick="payWithChipperCash()">
-             Donate to us
-        </button>
+        <form action="https://www.pesapal.com/API/PostPesapalDirectOrderV4" method="POST">
+  <input type="hidden" name="Amount" value="5">
+  <input type="hidden" name="Description" value="Payment for Product X">
+  <input type="hidden" name="Type" value="MERCHANT">
+  <input type="hidden" name="Reference" value="ORDER123">
+  <input type="hidden" name="FirstName" value="John">
+  <input type="hidden" name="LastName" value="Doe">
+  <input type="hidden" name="Email" value="john.doe@example.com">
+  <input type="hidden" name="PhoneNumber" value="0712345678">
+  <input type="hidden" name="Currency" value="USD">
+  <input type="hidden" name="CallbackURL" value="https://prayerwork.netlify.app">
+  <button type="submit">Pay with PesaPal</button>
+        </form>
         
     </div>
 </div>
@@ -36,21 +44,18 @@
     </section>
     
    <script>
-    function payWithVisa() {
-        window.location.href = "https://yourvisa-payment-link.com";
-    }
+       exports.handler = async (event, context) => {
+  const { pesapal_merchant_reference, pesapal_transaction_tracking_id } = event.queryStringParameters;
 
-    function payWithMobileMoney() {
-        window.location.href = "https://your-mobile-money-payment-link.com";
-    }
+  // Process the payment status (e.g., update your database)
+  console.log("Merchant Reference:", pesapal_merchant_reference);
+  console.log("Transaction Tracking ID:", pesapal_transaction_tracking_id);
 
-    function payWithChipperCash() {
-        window.location.href = "https://your-chipper-cash-payment-link.com";
-    }
-
-    function payWithPayPal() {
-        window.location.href = "https://www.paypal.com/donate/?hosted_button_id=YOUR_BUTTON_ID";
-    }
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: "Callback received" }),
+  };
+};
 </script>
     
     
