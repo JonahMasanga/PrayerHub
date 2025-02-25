@@ -19,36 +19,74 @@
         <h2>Support Our Project</h2>
         <p>Your generous contributions make a real difference! Please consider supporting our work by making a donation.</p>
 
-     <div class="payment-container">
-    <h3> Donation Method</h3>
-    <p>Click on the Donate to us button to choose your favourite donation method</p>
-    <div class="payment-options">
+        <div class="payment-container">
+            <h3>Donation Method</h3>
+            <p>Click on the "Donate to Us" button to choose your favorite donation method.</p>
+            <div class="payment-options">
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="amount">Amount (KES):</label>
+                        <input type="number" id="amount" name="amount" placeholder="e.g., 1000" min="1" required>
+                    </div>
 
-    <form action="create_payment.php" method="POST">
-        <label for="amount">Amount (KES):</label>
-        <input type="number" id="amount" name="amount" value="1000" required><br><br>
+                    <div class="form-group">
+                        <label for="email">Your Email:</label>
+                        <input type="email" id="email" name="email" placeholder="e.g., customer@email.com" required>
+                    </div>
 
-        <label for="email">Your Email:</label>
-        <input type="email" id="email" name="email" value="customer@email.com" required><br><br>
+                    <div class="form-group">
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" placeholder="e.g., 254712345678" pattern="[0-9]{10,12}" required>
+                        <small>Format: 254712345678 (10-12 digits)</small>
+                    </div>
 
-        <label for="phone">Phone Number:</label>
-        <input type="tel" id="phone" name="phone" value="2547XXXXXXX" required><br><br>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <input type="text" id="description" name="description" placeholder="e.g., Donation for Project X" required>
+                    </div>
 
-        <label for="description">Description:</label>
-        <input type="text" id="description" name="description" value="Sample Payment" required><br><br>
-
-        <input type="submit" value="Pay Now">
-    </form>
-        
-    </div>
-</div>
-
+                    <div class="form-group">
+                        <input type="submit" value="Pay Now" class="btn-submit">
+                    </div>
+                </form>
+            </div>
+        </div>
     </section>
-    
-   
-    
-    
-    
 
+    <!-- Add JavaScript to handle form submission -->
+    <script>
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevent the form from submitting the traditional way
+
+    // Get form data
+    const amount = document.getElementById('amount').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    const description = document.getElementById('description').value;
+
+    // Send data to the backend
+    try {
+        const response = await fetch('http://localhost:3000/initiate-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ amount, email, phone, description }),
+        });
+
+        const data = await response.json();
+
+        if (data.payment_url) {
+            // Redirect to PesaPal payment page
+            window.location.href = data.payment_url;
+        } else {
+            alert('Payment initiation failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
+    </script>
 </body>
 </html>
