@@ -144,6 +144,22 @@
             }
         }
 
+        const testimonials = [
+        "“I prayed for healing, and God answered my prayers!” – John D.",
+        "“I felt God's presence during a tough time.” – Sarah L.",
+        "“Prayer changed my life in ways I never imagined.” – Mark R."
+    ];
+
+    let index = 0;
+    const testimonialText = document.getElementById("testimonial-text");
+
+    if (testimonialText) {
+        setInterval(() => {
+            testimonialText.textContent = testimonials[index];
+            index = (index + 1) % testimonials.length;
+        }, 5000);
+    }
+
     </script>
 
     <script>
