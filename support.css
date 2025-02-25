@@ -1,0 +1,197 @@
+/* General Styles */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Navigation Bar */
+nav {
+    background-color: #566;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    gap: 15px; /* Consistent spacing between buttons */
+    width: 100%;
+    position: relative;
+    z-index: 1000;
+    font-weight: bold;
+}
+
+nav a,
+nav-button {
+    background-color: #566;
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background 0.3s;
+    border: none;
+    display: inline-block;
+}
+
+nav a:hover,
+nav button:hover {
+    background-color: #ddd;
+    color: #007bff;
+}
+
+nav button.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Tab Content */
+.tab-content {
+    display: block;
+    padding: 20px;
+}
+
+/* Support Section */
+#support {
+    padding: 20px;
+    text-align: center; /* Center the content */
+}
+
+/* Donation Section */
+.donation-section {
+    margin-top: 20px;
+    margin-bottom: 30px; /* Add space between donation and form */
+}
+
+.donation-section form { 
+    display: inline-block; /* Prevent form from taking full width */
+}
+
+/* Support Form */
+.support-form {
+    max-width: 600px;
+    margin: 20px auto; /* Center the form */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Input & Textarea Styling */
+input,
+textarea {
+    width: calc(100% - 16px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+textarea {
+    height: 150px;
+}
+
+/* Submit Button */
+button[type="submit"] {
+    background-color: #808080;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+
+.payment-container {
+    text-align: center;
+    background-color: #teal;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+/* ... (General styles from previous example) ... */
+
+.payment-container {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px auto; /* Center the container */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px; /* Adjust as needed */
+    text-align: center; /* Center the heading */
+}
+
+.payment-container h3 {
+    margin-top: 1px;
+}
+
+.payment-options {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 15px; /* Spacing between buttons */
+}
+
+.payment-options button {
+    background-color: coral;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+    display: block;
+    width: auto;
+    max-width: 300px;
+    margin: 20px auto;
+}
+
+.payment-options button:hover {
+    background-color: #0056b3; /* Darker blue */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.payment-options button img {
+    width: 30px; /* Adjust icon size */
+    height: 30px;
+    margin-right: 10px;
+}
+
+/* Optional: Style the Visa icon if you're using Font Awesome */
+.payment-options button i.fa-brands.fa-cc-visa {
+    font-size: 30px;
+    margin-right: 10px;
+}
+
+
+
+

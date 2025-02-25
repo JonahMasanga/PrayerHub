@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayer & Testimonies</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="nav-button">Home</a>
+        <a href="support.html" class="nav-button">Support</a>
+        <a href="contact.html" class="nav-button">Contact</a>
+    </nav>
+
+    <section id="testimonies" class="tab-content">
+        <h3 id="title">TESTIMONIES</h3>
+        <div id="testimony-container">
+            <div id="testimonies-list">
+                <!-- Testimony content goes here -->
+            </div>
+            
+                
+           <!-- Added prev-button -->
+            <button id="next-button">Next</button>
+        </div>
+        <button id="show-form-button">Add Testimony</button>
+    </section>
+
+    <div class="form-container" id="testimony-form-container" style="display: none;">
+        <h2>Share Your Testimony</h2>
+        <form id="testimony-form">
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="testimony">Your Testimony</label>
+                <textarea id="testimony" name="testimony" rows="5" required></textarea>
+            </div>
+            <button type="submit">Submit Testimony</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Firebase configuration
+            const firebaseConfig = {
+                databaseURL: "https://pray-20000-default-rtdb.firebaseio.com",
+                projectId: "pray-20000"
+            };
+
+            // Initialize Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            // Reference to the testimonies node in Firebase
+            const testimoniesRef = database.ref('testimonies');
+
+            // Variables to manage testimonies
+            let testimonies = [];
+            let currentTestimonyIndex = 0;
+
+            // Function to Display Testimonies
+            function displayTestimonies() {
+                const testimonyList = document.getElementById("testimonies-list");
+                testimonyList.innerHTML = ""; // Clear existing content
+
+                if (testimonies.length === 0) {
+                    testimonyList.innerHTML = "<p>No testimonies yet.</p>";
+                    return;
+                }
+
+                const testimony = testimonies[currentTestimonyIndex];
+                const testimonyDiv = document.createElement("div");
+                testimonyDiv.classList.add("testimony-item");
+
+                const nameElement = document.createElement("h4");
+                nameElement.textContent = testimony.name;
+
+                const testimonyText = document.createElement("p");
+                testimonyText.textContent = testimony.testimony;
+
+                testimonyDiv.appendChild(nameElement);
+                testimonyDiv.appendChild(testimonyText);
+                testimonyList.appendChild(testimonyDiv);
+            }
+
+            // Fetch Testimonies from Firebase on Page Load
+            testimoniesRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    testimonies = Object.values(data);
+                    displayTestimonies();
+                } else {
+                    testimonies = [];
+                    displayTestimonies();
+                }
+            });
+
+            // Handle Testimony Form Submission
+            document.getElementById('testimony-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const name = document.getElementById('name').value.trim();
+                const testimony = document.getElementById('testimony').value.trim();
+
+                if (!name || !testimony) {
+                    alert("Please fill out all fields.");
+                    return;
+                }
+
+                // Save testimony to Firebase
+                const newTestimonyRef = testimoniesRef.push();
+                newTestimonyRef.set({
+                    name: name,
+                    testimony: testimony
+                }).then(() => {
+                    alert("Testimony submitted successfully!");
+                    document.getElementById('testimony-form').reset();
+                    testimonyFormContainer.style.display = 'none';
+                    showFormButton.style.display = 'block';
+                }).catch((error) => {
+                    console.error("Error saving testimony: ", error);
+                });
+            });
+
+            // Show/Hide Testimony Form
+            const showFormButton = document.getElementById('show-form-button');
+            const testimonyFormContainer = document.getElementById('testimony-form-container');
+
+            showFormButton.addEventListener('click', () => {
+                testimonyFormContainer.style.display = 'block';
+                showFormButton.style.display = 'none';
+            });
+
+            // Next Testimony Logic
+            const nextButton = document.getElementById('next-button');
+
+            nextButton.addEventListener('click', () => {
+                if (testimonies.length > 0) {
+                    currentTestimonyIndex = (currentTestimonyIndex + 1) % testimonies.length;
+                    displayTestimonies();
+                }
+            });
+
+            // Previous Testimony Logic
+            
+
+            
+            });
+       
+    </script>
+</body>
+</html>

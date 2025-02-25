@@ -1,24 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pesapal Payment</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayer Works</title>
+    <link rel="stylesheet" href="index.css"> 
+    <style>
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
-    <h2>Make a Payment</h2>
-    <form action="http://localhost:3000/pay" method="POST">
-        <label>Amount:</label>
-        <input type="text" name="amount" required><br><br>
-        
-        <label>Email:</label>
-        <input type="email" name="email" required><br><br>
-        
-        <label>Phone:</label>
-        <input type="text" name="phone" required><br><br>
-        
-        <label>Description:</label>
-        <input type="text" name="description" required><br><br>
-        
-        <button type="submit">Pay with Pesapal</button>
-    </form>
+
+    <header class="header">
+        <h1>PRAYER WORKS</h1>
+        <nav>
+            <div class="nav-links">   
+                <a href="index.html">Home</a>
+                <a href="support.html">Support</a>
+                <a href="testimonies.html">Testimonies</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Welcome to Prayer Hub</h2>
+            <p>Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.</p>
+
+            <div class="verse-box">
+                <p>“The Lord is near to all who call on Him.” – Psalm 145:18</p>
+            </div>        
+
+            <button class="cta-button" id="needPrayerButton">NEED A PRAYER</button>
+
+            <form id="prayer-form" class="prayer-form hidden">
+                <h3>Submit Your Prayer Request</h3>
+
+                <label for="name">Your Name</label>
+                <input type="text" id="name" placeholder="Enter your name" required>
+
+                <label for="prayer-request">Your Testimony/Prayer Request</label>
+                <textarea id="prayer-request" placeholder="Enter your prayer request" required></textarea>
+
+                <label for="country">Country</label>
+                <select id="country" name="country" required>
+                    <option value="" disabled selected>Select Your Continent</option>
+                    <option value="ANTARCTICA">ANTARCTICA</option>
+                    <option value="NORTH AMERICA">NORTH AMERICA</option>
+                    <option value="EUROPE">EUROPE</option>
+                    <option value="AUSTRALIA">AUSTRALIA</option>
+                    <option value="SOUTH AMERICA">SOUTH AMERICA</option>
+                    <option value="ASIA">ASIA</option>
+                    <option value="AFRICA">AFRICA</option>
+                </select>
+
+                <button type="submit" class="submit-button">Submit Prayer Request</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="daily-verse-container">
+        <h2>📖 Today's Bible Verse</h2>
+        <p id="daily-verse">Loading verse...</p>
+    </div>
+
+    <div class="testimonies-container">
+        <h3 class="testimonies-title">Testimonies</h3>
+        <div class="testimony">
+            <p id="testimonial-text">“I prayed for healing, and God answered my prayers!” – John D.</p>
+        </div>
+    </div>
+
+    <button class="whatsapp-button" onclick="openWhatsApp()">Live Chat on WhatsApp</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"; 
+
+        const firebaseConfig = {
+            databaseURL: "https://pray-20000-default-rtdb.firebaseio.com",
+            projectId: "pray-20000"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayRandomVerse();
+
+            const prayerForm = document.getElementById("prayer-form");
+            const needPrayerButton = document.getElementById("needPrayerButton");
+
+            needPrayerButton.addEventListener("click", function() {
+                prayerForm.classList.toggle("hidden");
+            });
+
+            prayerForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                const name = document.getElementById("name").value;
+                const message = document.getElementById("prayer-request").value;
+                const country = document.getElementById("country").value;
+
+                if (name && message && country) {
+                    const prayerRequestsRef = ref(db, 'prayerRequests');
+                    const newRequestRef = push(prayerRequestsRef);
+
+                    set(newRequestRef, {
+                        name: name,
+                        prayer: message,
+                        country: country,
+                        timestamp: new Date().toISOString()
+                    })
+                    .then(() => {
+                        prayerForm.reset();
+                        prayerForm.classList.add('hidden');
+                        alert("Prayer request submitted!");
+                        window.location.href = "support.html"; // ✅ Redirect to support page
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert('Error submitting prayer request.');
+                    });
+                } else {
+                    alert("Please fill in all required fields.");
+                }
+            });
+        });
+
+        function displayRandomVerse() {
+            const verses = [
+                { text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", book_name: "Philippians", chapter: 4, verse: 6 },
+                { text: "For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.", book_name: "Jeremiah", chapter: 29, verse: 11 }
+            ];
+            const randomIndex = Math.floor(Math.random() * verses.length);
+            const randomVerse = verses[randomIndex];
+            const verseContainer = document.getElementById('daily-verse');
+            if (verseContainer) {
+                verseContainer.innerHTML = `"${randomVerse.text}" - ${randomVerse.book_name} ${randomVerse.chapter}:${randomVerse.verse}`;
+            } else {
+                console.error("daily-verse element not found!");
+            }
+        }
+
+        const testimonials = [
+        "“I prayed for healing, and God answered my prayers!” – John D.",
+        "“I felt God's presence during a tough time.” – Sarah L.",
+        "“Prayer changed my life in ways I never imagined.” – Mark R."
+    ];
+
+    let index = 0;
+    const testimonialText = document.getElementById("testimonial-text");
+
+    if (testimonialText) {
+        setInterval(() => {
+            testimonialText.textContent = testimonials[index];
+            index = (index + 1) % testimonials.length;
+        }, 5000);
+    }
+
+    </script>
+
+    <script>
+        function openWhatsApp() {
+            var phoneNumber = "256788925048";
+            var message = "Hello, I need assistance.";
+            var url = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(message);
+            window.open(url, "_blank");
+        }
+    </script>
+
+>>>>>>> 0bd8d95e4fac061e7fc893bc002a3b1249b5e139
 </body>
 </html>
