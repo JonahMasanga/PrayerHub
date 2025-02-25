@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pesapal Payment</title>
+</head>
+<body>
+    <h2>Make a Payment</h2>
+    <form action="http://localhost:3000/pay" method="POST">
+        <label>Amount:</label>
+        <input type="text" name="amount" required><br><br>
+        
+        <label>Email:</label>
+        <input type="email" name="email" required><br><br>
+        
+        <label>Phone:</label>
+        <input type="text" name="phone" required><br><br>
+        
+        <label>Description:</label>
+        <input type="text" name="description" required><br><br>
+        
+        <button type="submit">Pay with Pesapal</button>
+    </form>
+</body>
+</html>
