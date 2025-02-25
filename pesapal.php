@@ -1,3 +1,15 @@
+// Step 1: Collect payment details from the form submission
+$amount = $_POST['amount'];
+$email = $_POST['email'];
+$phone = $_POST['phone'];
+$description = $_POST['description'];
+
+
+
+
+
+
+
 // Set up request parameters
 $consumerKey = 'cYZmXbANyExiVpmW1QtftPJrxQ5QQjKj';
 $consumerSecret = 'xqqM6ArR9HfZLh3zy/AbNxj46To=';
