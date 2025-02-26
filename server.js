@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const base64 = require("base-64");
 
 const app = express();
 app.use(express.json()); // Parse JSON requests
@@ -11,24 +12,37 @@ const PESAPAL_CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
 const PESAPAL_CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
 const PESAPAL_API_URL = "https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken"; // Sandbox API URL
 
-// Step 1: Get Access Token
-app.get("/api/get-token", async (req, res) => {
+// Helper function to get access token
+async function getPesapalToken() {
   try {
+    const credentials = `${PESAPAL_CONSUMER_KEY}:${PESAPAL_CONSUMER_SECRET}`;
+    const encodedCredentials = base64.encode(credentials);
+
     const response = await axios.post(
       PESAPAL_API_URL,
+      {},
       {
-        consumer_key: PESAPAL_CONSUMER_KEY,
-        consumer_secret: PESAPAL_CONSUMER_SECRET,
-      },
-      {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
-    res.json(response.data);
+    return response.data.token; // Return the token
   } catch (error) {
-    console.error("Error getting token:", error);
-    res.status(500).json({ error: "Failed to get access token" });
+    console.error("Error getting token:", error.response?.data || error.message);
+    throw new Error("Failed to get access token");
+  }
+}
+
+// Step 1: Get Access Token Endpoint
+app.get("/api/get-token", async (req, res) => {
+  try {
+    const token = await getPesapalToken();
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -36,14 +50,13 @@ app.get("/api/get-token", async (req, res) => {
 app.post("/api/initiate-payment", async (req, res) => {
   const { amount, email, phone, description } = req.body;
 
+  if (!amount || !email || !phone || !description) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+
   try {
     // Get access token
-    const tokenResponse = await axios.post(PESAPAL_API_URL, {
-      consumer_key: PESAPAL_CONSUMER_KEY,
-      consumer_secret: PESAPAL_CONSUMER_SECRET,
-    });
-
-    const accessToken = tokenResponse.data.token;
+    const accessToken = await getPesapalToken();
 
     // Prepare payment request
     const paymentRequest = {
@@ -53,6 +66,8 @@ app.post("/api/initiate-payment", async (req, res) => {
       Email: email,
       PhoneNumber: phone,
       Reference: `ORD_${Date.now()}`, // Unique order reference
+      CallbackUrl: "https://yourdomain.com/payment-success", // Replace with your success URL
+      NotificationId: "YOUR_NOTIFICATION_ID", // Pesapal Notification ID
     };
 
     // Submit payment request
@@ -69,7 +84,7 @@ app.post("/api/initiate-payment", async (req, res) => {
 
     res.json(paymentResponse.data);
   } catch (error) {
-    console.error("Error initiating payment:", error);
+    console.error("Error initiating payment:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to initiate payment" });
   }
 });
@@ -78,7 +93,6 @@ app.post("/api/initiate-payment", async (req, res) => {
 app.post("/pay", async (req, res) => {
   const { amount, email, phone, description } = req.body;
 
-  // Validate input
   if (!amount || !email || !phone || !description) {
     return res.status(400).json({ error: "All fields are required." });
   }
