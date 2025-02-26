@@ -3,6 +3,7 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 const base64 = require("base-64");
+const path = require("path");
 
 const app = express();
 app.use(express.json()); // Parse JSON requests
@@ -88,6 +89,19 @@ app.post("/api/initiate-payment", async (req, res) => {
     res.status(500).json({ error: "Failed to initiate payment" });
   }
 });
+
+//serve static ( e.g index.html)
+app.use(express.static("public"));
+
+
+// Route for the root URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
+
+
 
 // Handle Payment Form Submission
 app.post("/pay", async (req, res) => {

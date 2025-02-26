@@ -66,8 +66,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebas
            console.error("daily-verse element not found!");
        }
    }
-
-   const testimonials = [
+document.addEventListener("DOMContentLoaded", displayRandomVerse);
+  
+ const testimonials = [
        "“I prayed for healing, and God answered my prayers!” – John D.",
        "“I felt God's presence during a tough time.” – Sarah L.",
        "“Prayer changed my life in ways I never imagined.” – Mark R."

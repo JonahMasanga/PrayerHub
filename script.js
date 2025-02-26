@@ -1,16 +1,22 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-   import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-   import dotenv from 'dotenv';
+function displayRandomVerse() {
+    const verses = [
+        { text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", book_name: "Philippians", chapter: 4, verse: 6 },
+        { text: "For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.", book_name: "Jeremiah", chapter: 29, verse: 11 }
+    ];
+    const randomIndex = Math.floor(Math.random() * verses.length);
+    const randomVerse = verses[randomIndex];
+    const verseContainer = document.getElementById('daily-verse');
+    
+    if (verseContainer) {
+        verseContainer.innerHTML = `"${randomVerse.text}" - ${randomVerse.book_name} ${randomVerse.chapter}:${randomVerse.verse}`;
+    } else {
+        console.error("daily-verse element not found!");
+    }
+}
 
-   // Load environment variables
-   dotenv.config();
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM fully loaded");
+    displayRandomVerse(); // Call the function here
 
-   const firebaseConfig = {
-       databaseURL: process.env.FIREBASE_DATABASE_URL,
-       projectId: process.env.FIREBASE_PROJECT_ID
-   };
-
-   const app = initializeApp(firebaseConfig);
-   const db = getDatabase(app);
-
-   // Rest of your code...
+    // Other initialization code...
+});
