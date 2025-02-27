@@ -1,20 +1,15 @@
 import { defineConfig } from 'vite';
 import dotenv from 'dotenv';
 
-// Load environment variables from .env file
-dotenv.config();
+dotenv.config(); // Load environment variables from .env file
 
 export default defineConfig({
-  // Optional: Define the root folder if it's not the default
-  root: './', // Make sure Vite looks in the correct directory
-
-  // Set up the public directory
-  publicDir: 'public', // Ensure public assets are correctly served
-
-  define: {
-    'process.env': {
-      FIREBASE_DATABASE_URL: JSON.stringify(process.env.FIREBASE_DATABASE_URL),
-      FIREBASE_PROJECT_ID: JSON.stringify(process.env.FIREBASE_PROJECT_ID),
-    }
-  }
+    root: './public', // Set the root directory to "public"
+    server: {
+        port: 5173, // Ensure the port matches what you're using
+        open: true, // Automatically open the browser
+    },
+    build: {
+        outDir: '../dist', // Output directory for the build
+    },
 });

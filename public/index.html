@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prayer Works</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css"> 
     <style>
         .hidden { display: none; }
     </style>
@@ -14,8 +14,8 @@
     <header class="header">
         <h1>PRAYER WORKS</h1>
         <nav>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
+            <div class="nav-links">   
+                <a href="Pray with me.html">Home</a>
                 <a href="support.html">Support</a>
                 <a href="testimonies.html">Testimonies</a>
                 <a href="contact.html">Contact</a>
@@ -30,7 +30,7 @@
 
             <div class="verse-box">
                 <p>“The Lord is near to all who call on Him.” – Psalm 145:18</p>
-            </div>
+            </div>        
 
             <button class="cta-button" id="needPrayerButton">NEED A PRAYER</button>
 
@@ -74,8 +74,102 @@
 
     <button class="whatsapp-button" onclick="openWhatsApp()">Live Chat on WhatsApp</button>
 
-    <script type="module" src="/src/main.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"; 
 
-    
+        const firebaseConfig = {
+            databaseURL: "https://pray-20000-default-rtdb.firebaseio.com",
+            projectId: "pray-20000"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayRandomVerse();
+
+            const prayerForm = document.getElementById("prayer-form");
+            const needPrayerButton = document.getElementById("needPrayerButton");
+
+            needPrayerButton.addEventListener("click", function() {
+                prayerForm.classList.toggle("hidden");
+            });
+
+            prayerForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                const name = document.getElementById("name").value;
+                const message = document.getElementById("prayer-request").value;
+                const country = document.getElementById("country").value;
+
+                if (name && message && country) {
+                    const prayerRequestsRef = ref(db, 'prayerRequests');
+                    const newRequestRef = push(prayerRequestsRef);
+
+                    set(newRequestRef, {
+                        name: name,
+                        prayer: message,
+                        country: country,
+                        timestamp: new Date().toISOString()
+                    })
+                    .then(() => {
+                        prayerForm.reset();
+                        prayerForm.classList.add('hidden');
+                        alert("Prayer request submitted!");
+                        window.location.href = "support.html"; // ✅ Redirect to support page
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert('Error submitting prayer request.');
+                    });
+                } else {
+                    alert("Please fill in all required fields.");
+                }
+            });
+        });
+
+        function displayRandomVerse() {
+            const verses = [
+                { text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", book_name: "Philippians", chapter: 4, verse: 6 },
+                { text: "For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.", book_name: "Jeremiah", chapter: 29, verse: 11 }
+            ];
+            const randomIndex = Math.floor(Math.random() * verses.length);
+            const randomVerse = verses[randomIndex];
+            const verseContainer = document.getElementById('daily-verse');
+            if (verseContainer) {
+                verseContainer.innerHTML = `"${randomVerse.text}" - ${randomVerse.book_name} ${randomVerse.chapter}:${randomVerse.verse}`;
+            } else {
+                console.error("daily-verse element not found!");
+            }
+        }
+        const testimonials = [
+        "“I prayed for healing, and God answered my prayers!” – John D.",
+        "“I felt God's presence during a tough time.” – Sarah L.",
+        "“Prayer changed my life in ways I never imagined.” – Mark R."
+    ];
+
+    let index = 0;
+    const testimonialText = document.getElementById("testimonial-text");
+
+    if (testimonialText) {
+        setInterval(() => {
+            testimonialText.textContent = testimonials[index];
+            index = (index + 1) % testimonials.length;
+        }, 5000);
+    }
+
+
+    </script>
+
+    <script>
+        function openWhatsApp() {
+            var phoneNumber = "256788925048";
+            var message = "Hello, I need assistance.";
+            var url = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(message);
+            window.open(url, "_blank");
+        }
+    </script>
+
 </body>
 </html>
