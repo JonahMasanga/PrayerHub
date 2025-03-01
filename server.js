@@ -2,120 +2,126 @@ require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
-const base64 = require("base-64");
-const path = require("path");
+const OAuth = require("oauth-1.0a");
+const crypto = require("crypto");
 
 const app = express();
-app.use(express.json()); // Parse JSON requests
-app.use(cors()); // Enable CORS
+app.use(express.json());
+app.use(cors());
 
 const PESAPAL_CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
 const PESAPAL_CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
-const PESAPAL_API_URL = "https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken"; // Sandbox API URL
+const PESAPAL_API_URL = process.env.PESAPAL_API_URL;
+const CALLBACK_URL = process.env.CALLBACK_URL;
+const PORT = process.env.PORT || 5000;
 
-// Helper function to get access token
-async function getPesapalToken() {
+// ✅ Ensure environment variables are loaded
+if (!PESAPAL_CONSUMER_KEY || !PESAPAL_CONSUMER_SECRET) {
+  console.error("❌ Missing Pesapal API credentials in .env file!");
+  process.exit(1);
+}
+
+// ✅ Initialize OAuth 1.0a
+const oauth = OAuth({
+  consumer: {
+    key: PESAPAL_CONSUMER_KEY,
+    secret: PESAPAL_CONSUMER_SECRET,
+  },
+  signature_method: "HMAC-SHA1",
+  hash_function(base_string, key) {
+    return crypto.createHmac("sha1", key).update(base_string).digest("base64");
+  },
+});
+
+// ✅ Function to get OAuth token from Pesapal
+async function getAccessToken() {
+  const requestData = {
+    url: `${PESAPAL_API_URL}/api/Auth/RequestToken`,
+    method: "POST",
+  };
+
+  const headers = oauth.toHeader(oauth.authorize(requestData));
+  headers["Content-Type"] = "application/json";
+
+  console.log("🔍 OAuth Headers:", headers);
+
   try {
-    const credentials = `${PESAPAL_CONSUMER_KEY}:${PESAPAL_CONSUMER_SECRET}`;
-    const encodedCredentials = base64.encode(credentials);
-
-    const response = await axios.post(
-      PESAPAL_API_URL,
-      {},
-      {
-        headers: {
-          Authorization: `Basic ${encodedCredentials}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    return response.data.token; // Return the token
+    const response = await axios.post(requestData.url, {}, { headers });
+    console.log("✅ Pesapal Token Response:", response.data);
+    return response.data.token;
   } catch (error) {
-    console.error("Error getting token:", error.response?.data || error.message);
-    throw new Error("Failed to get access token");
+    console.error("❌ Pesapal Auth Error:", error.response?.data || error.message);
+    return null;
   }
 }
 
-// Step 1: Get Access Token Endpoint
-app.get("/api/get-token", async (req, res) => {
+// ✅ Route to initiate payment
+app.post("/pesapal/pay", async (req, res) => {
   try {
-    const token = await getPesapalToken();
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+    const token = await getAccessToken();
+    if (!token) return res.status(500).json({ error: "Failed to get token" });
 
-// Step 2: Handle Payment Requests
-app.post("/api/initiate-payment", async (req, res) => {
-  const { amount, email, phone, description } = req.body;
+    const { amount, email, phone, reference } = req.body;
 
-  if (!amount || !email || !phone || !description) {
-    return res.status(400).json({ error: "All fields are required." });
-  }
-
-  try {
-    // Get access token
-    const accessToken = await getPesapalToken();
-
-    // Prepare payment request
-    const paymentRequest = {
-      Amount: amount,
-      Currency: "UGX", // Set to your currency
-      Description: description,
-      Email: email,
-      PhoneNumber: phone,
-      Reference: `ORD_${Date.now()}`, // Unique order reference
-      CallbackUrl: "https://yourdomain.com/payment-success", // Replace with your success URL
-      NotificationId: "YOUR_NOTIFICATION_ID", // Pesapal Notification ID
+    const paymentData = {
+      id: reference,
+      currency: "UGX",
+      amount: amount,
+      description: "Payment for services",
+      callback_url: CALLBACK_URL,
+      notification_id: "YOUR_UNIQUE_ID",
+      billing_address: {
+        email_address: email,
+        phone_number: phone,
+        country_code: "UG",
+      },
     };
 
-    // Submit payment request
-    const paymentResponse = await axios.post(
-      "https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest",
-      paymentRequest,
+    console.log("📌 Payment Data:", paymentData);
+
+    const response = await axios.post(
+      `${PESAPAL_API_URL}/api/Transactions/SubmitOrderRequest`,
+      paymentData,
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       }
     );
 
-    res.json(paymentResponse.data);
+    console.log("✅ Payment Response:", response.data);
+    res.json(response.data);
   } catch (error) {
-    console.error("Error initiating payment:", error.response?.data || error.message);
-    res.status(500).json({ error: "Failed to initiate payment" });
+    console.error("❌ Payment Error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to initiate payment", details: error.response?.data });
   }
 });
 
-//serve static ( e.g index.html)
-app.use(express.static("public"));
+// ✅ Route to handle IPN (Instant Payment Notification)
+app.post("/pesapal/ipn", async (req, res) => {
+  try {
+    const { OrderTrackingId, OrderNotificationType } = req.body;
 
+    if (OrderNotificationType !== "ORDER_COMPLETED") {
+      return res.status(400).json({ error: "Invalid notification type" });
+    }
 
-// Route for the root URL
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+    const token = await getAccessToken();
+    if (!token) return res.status(500).json({ error: "Failed to get token" });
 
+    const response = await axios.get(
+      `${PESAPAL_API_URL}/api/Transactions/GetTransactionStatus?OrderTrackingId=${OrderTrackingId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-
-
-
-// Handle Payment Form Submission
-app.post("/pay", async (req, res) => {
-  const { amount, email, phone, description } = req.body;
-
-  if (!amount || !email || !phone || !description) {
-    return res.status(400).json({ error: "All fields are required." });
+    console.log("📌 Payment Status:", response.data.status);
+    res.json({ message: "Payment status updated", status: response.data.status });
+  } catch (error) {
+    console.error("❌ IPN Error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to process IPN", details: error.response?.data });
   }
-
-  res.json({ message: "Payment request received!", amount, email, phone, description });
 });
 
-// Start Server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// ✅ Start server
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

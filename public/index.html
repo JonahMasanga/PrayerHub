@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prayer Works</title>
-    <link rel="stylesheet" href="index.css"> 
+    <link rel="stylesheet" href="index.css">
     <style>
         .hidden { display: none; }
     </style>
@@ -14,8 +14,8 @@
     <header class="header">
         <h1>PRAYER WORKS</h1>
         <nav>
-            <div class="nav-links">   
-                <a href="Pray with me.html">Home</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a> <!-- Fixed link -->
                 <a href="support.html">Support</a>
                 <a href="testimonies.html">Testimonies</a>
                 <a href="contact.html">Contact</a>
@@ -30,10 +30,11 @@
 
             <div class="verse-box">
                 <p>“The Lord is near to all who call on Him.” – Psalm 145:18</p>
-            </div>        
+            </div>
 
             <button class="cta-button" id="needPrayerButton">NEED A PRAYER</button>
 
+            <!-- Hidden prayer request form -->
             <form id="prayer-form" class="prayer-form hidden">
                 <h3>Submit Your Prayer Request</h3>
 
@@ -60,11 +61,13 @@
         </div>
     </section>
 
+    <!-- Today's Bible Verse -->
     <div id="daily-verse-container">
         <h2>📖 Today's Bible Verse</h2>
         <p id="daily-verse">Loading verse...</p>
     </div>
 
+    <!-- Testimonies Section -->
     <div class="testimonies-container">
         <h3 class="testimonies-title">Testimonies</h3>
         <div class="testimony">
@@ -72,11 +75,12 @@
         </div>
     </div>
 
+    <!-- WhatsApp Chat -->
     <button class="whatsapp-button" onclick="openWhatsApp()">Live Chat on WhatsApp</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"; 
+        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
         const firebaseConfig = {
             databaseURL: "https://pray-20000-default-rtdb.firebaseio.com",
@@ -86,16 +90,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Event listeners for form toggle and form submission
         document.addEventListener('DOMContentLoaded', function() {
             displayRandomVerse();
 
             const prayerForm = document.getElementById("prayer-form");
             const needPrayerButton = document.getElementById("needPrayerButton");
 
+            // Toggle prayer form visibility when the "Need Prayer" button is clicked
             needPrayerButton.addEventListener("click", function() {
                 prayerForm.classList.toggle("hidden");
             });
 
+            // Handle prayer request form submission
             prayerForm.addEventListener("submit", function(event) {
                 event.preventDefault();
 
@@ -129,6 +136,7 @@
             });
         });
 
+        // Display random Bible verse
         function displayRandomVerse() {
             const verses = [
                 { text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", book_name: "Philippians", chapter: 4, verse: 6 },
@@ -143,25 +151,27 @@
                 console.error("daily-verse element not found!");
             }
         }
+
+        // Testimonials carousel
         const testimonials = [
-        "“I prayed for healing, and God answered my prayers!” – John D.",
-        "“I felt God's presence during a tough time.” – Sarah L.",
-        "“Prayer changed my life in ways I never imagined.” – Mark R."
-    ];
+            "“I prayed for healing, and God answered my prayers!” – John D.",
+            "“I felt God's presence during a tough time.” – Sarah L.",
+            "“Prayer changed my life in ways I never imagined.” – Mark R."
+        ];
 
-    let index = 0;
-    const testimonialText = document.getElementById("testimonial-text");
+        let index = 0;
+        const testimonialText = document.getElementById("testimonial-text");
 
-    if (testimonialText) {
-        setInterval(() => {
-            testimonialText.textContent = testimonials[index];
-            index = (index + 1) % testimonials.length;
-        }, 5000);
-    }
-
+        if (testimonialText) {
+            setInterval(() => {
+                testimonialText.textContent = testimonials[index];
+                index = (index + 1) % testimonials.length;
+            }, 5000);
+        }
 
     </script>
 
+    <!-- WhatsApp chat function -->
     <script>
         function openWhatsApp() {
             var phoneNumber = "256788925048";
