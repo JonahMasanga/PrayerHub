@@ -74,7 +74,7 @@ document.getElementById("payButton").addEventListener("click", async (e) => {
     const paymentData = { amount, currency: "UGX", email, phone, description };
 
     try {
-        const response = await fetch("https://yourbackend.com/initiate-payment", {
+        const response = await fetch("https://prayerwork.onrender.com/initiate-payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(paymentData)
