@@ -7,6 +7,9 @@ const app = express();
 app.use(express.json());
 app.use(cors()); // Allow requests from frontend
 
+// Serve static files from the "public" folder (adjust this to match your project structure)
+app.use(express.static('public'));
+
 // Pesapal Credentials (Set in .env or GitHub Secrets)
 const PESAPAL_CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
 const PESAPAL_CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
@@ -15,10 +18,15 @@ const PESAPAL_CALLBACK_URL = process.env.PESAPAL_CALLBACK_URL;
 // Generate Access Token
 async function getAccessToken() {
     const authUrl = "https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken";
-    const credentials = { consumer_key: PESAPAL_CONSUMER_KEY, consumer_secret: PESAPAL_CONSUMER_SECRET };
+    const credentials = {
+        consumer_key: PESAPAL_CONSUMER_KEY,
+        consumer_secret: PESAPAL_CONSUMER_SECRET,
+    };
 
     try {
-        const response = await axios.post(authUrl, credentials, { headers: { "Content-Type": "application/json" } });
+        const response = await axios.post(authUrl, credentials, {
+            headers: { "Content-Type": "application/json" },
+        });
         return response.data.token; // Pesapal Access Token
     } catch (error) {
         console.error("Error getting Pesapal token:", error.response?.data || error.message);
@@ -43,12 +51,20 @@ app.post("/initiate-payment", async (req, res) => {
             amount,
             description,
             callback_url: PESAPAL_CALLBACK_URL,
-            notification_id: "YOUR_NOTIFICATION_ID", // Required for callback handling
-            billing_address: { email_address: email, phone_number: phone, country_code: "UG", first_name: "User" }
+            notification_id: "YOUR_NOTIFICATION_ID", // You may want to dynamically set this value
+            billing_address: {
+                email_address: email,
+                phone_number: phone,
+                country_code: "UG",
+                first_name: "User", // Customize this if needed
+            },
         };
 
         const response = await axios.post(paymentUrl, paymentData, {
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
         });
 
         const redirect_url = response.data.redirect_url; // Pesapal Payment Link
@@ -56,8 +72,16 @@ app.post("/initiate-payment", async (req, res) => {
 
     } catch (error) {
         console.error("Payment error:", error.response?.data || error.message);
-        res.status(500).json({ message: "Payment initiation failed" });
+        res.status(500).json({
+            message: "Payment initiation failed",
+            error: error.response?.data || error.message,
+        });
     }
+});
+
+// Route for the root page
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 // Start Server
