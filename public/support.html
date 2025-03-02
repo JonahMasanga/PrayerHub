@@ -46,36 +46,55 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="submit" value="Pay Now" class="btn-submit">
+                    <button id="payButton" class="btn-submit">Make Payment</button>
                 </div>
             </form>
         </div>
 
-        <!-- Payment Iframe (Hidden by Default) -->
+        <!-- Payment Iframe -->
         <div id="paymentIframeContainer" style="display: none; margin-top: 20px;">
             <h3>Complete Your Payment</h3>
             <iframe id="paymentIframe" width="100%" height="600px" frameborder="0"></iframe>
         </div>
 
+        <div id="paymentStatus"></div>
+
     </section>
 
     <script>
-document.getElementById('paymentForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+document.getElementById("payButton").addEventListener("click", async (e) => {
+    e.preventDefault(); // Prevent form submission
 
     // Get user input
-    const amount = document.getElementById('amount').value;
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value;
-    const description = document.getElementById('description').value;
-    const reference = "TXN" + Date.now(); // Unique transaction reference
+    const amount = document.getElementById("amount").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const description = document.getElementById("description").value;
 
-    // Pesapal Payment URL
-    const pesapalUrl = `https://www.pesapal.com/merchant/?amount=${amount}&email=${email}&phone=${phone}&desc=${description}&reference=${reference}&currency=UGX`;
+    const paymentData = { amount, currency: "UGX", email, phone, description };
 
-    // Redirect the user to Pesapal
-    window.location.href = pesapalUrl;
+    try {
+        const response = await fetch("https://yourbackend.com/initiate-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(paymentData)
+        });
+
+        const data = await response.json();
+
+        if (data.redirect_url) {
+            // Instead of redirecting, load the URL in an iframe
+            document.getElementById("paymentIframeContainer").style.display = "block";
+            document.getElementById("paymentIframe").src = data.redirect_url;
+        } else {
+            document.getElementById("paymentStatus").innerText = "Payment initiation failed!";
+        }
+    } catch (error) {
+        console.error("Payment Error:", error);
+        document.getElementById("paymentStatus").innerText = "Error processing payment!";
+    }
 });
     </script>
+
 </body>
 </html>
