@@ -60,23 +60,22 @@
     </section>
 
     <script>
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-            // Get form data
-            const amount = document.getElementById('amount').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const description = document.getElementById('description').value;
+    // Get user input
+    const amount = document.getElementById('amount').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    const description = document.getElementById('description').value;
+    const reference = "TXN" + Date.now(); // Unique transaction reference
 
-            // Construct Pesapal payment URL (Replace `YOUR_MERCHANT_URL` with your real link)
-            const pesapalUrl = `https://www.pesapal.com/iframe/submit.php?amount=${amount}&email=${email}&phone=${phone}&desc=${description}&type=MERCHANT&reference=${Date.now()}&currency=UGX`;
+    // Pesapal Payment URL
+    const pesapalUrl = `https://www.pesapal.com/merchant/?amount=${amount}&email=${email}&phone=${phone}&desc=${description}&reference=${reference}&currency=UGX`;
 
-            // Display the iframe
-            document.getElementById('paymentIframeContainer').style.display = 'block';
-            document.getElementById('paymentIframe').src = pesapalUrl;
-        });
+    // Redirect the user to Pesapal
+    window.location.href = pesapalUrl;
+});
     </script>
-
 </body>
 </html>
